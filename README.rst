@@ -82,6 +82,7 @@ and auth token file from ``<home.dir>/.coursera/<client_name>_oauth2.csv``
     void generateOAuth2Tokens(String clientName) throws TokenNotGeneratedException;
 
 By default starting server callback listener and get auth tokens from Coursera OAuth API.
+
 Throws:
 ``TokenNotGeneratedException`` - if any error occured while generating OAuth2 tokens
 
@@ -110,7 +111,8 @@ List of client config from local file: ``<home.dir>/.coursera/coaclient.csv``.
 
     void startServerCallbackListener() throws TokenNotGeneratedException;
 
-Start server on default port '9876' for callback listener
+Start server on default port '9876' for callback listener.
+
 Throws:
 ``TokenNotGeneratedException`` - if any error occured while starting server listener
 
