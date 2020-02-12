@@ -28,11 +28,11 @@ Build jar file by command ``'mvn package'``, import jar to your project and crea
 ::
 
     CourseraOAuth2Service service = new CourseraOAuth2ServiceImpl();
-    service.addClient(clientName, clientId, clientSecret, scopes); ``// add new client configuration``
-    service.generateOAuth2Tokens(clientName); ``// generate authentication tokens``
-    String accessToken = service.getAccessToken(clientName); ``// get access token``
+    service.addClient(clientName, clientId, clientSecret, scopes); // add new client configuration
+    service.generateOAuth2Tokens(clientName); // generate authentication tokens
+    String accessToken = service.getAccessToken(clientName); // get access token
 
-The Coaclient tries to open the default system browser (If this step fails, the Coaclient suggests to open a link in the browser manually).
+The Coaclient tries to open the default system browser while generating authentication tokens.
 The application configuration will be saved to the local file if the request is succeeded.
 You should check the data you've provided to the library during application configuration if you see any errors in the browser.
 
@@ -120,6 +120,7 @@ Throws:
 
     void stopServerCallbackListener();
 
+Stop server callback listener.
 
 Bugs / Issues / Feature Requests
 -----
