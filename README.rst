@@ -36,8 +36,7 @@ The Coaclient tries to open the default system browser while generating authenti
 The application configuration will be saved to the local file if the request is succeeded.
 You should check the data you've provided to the library during application configuration if you see any errors in the browser.
 
-If client was successfully added and configured, you will be able to
-successfully get authentication tokens for Coursera API. Otherwise, an exception will be thrown telling you
+If the client was successfully added and configured, you would be able to get authentication tokens for Coursera API successfully. Otherwise, an exception will be thrown telling you
 to set up your application for API access.
 
 Documentation
@@ -45,7 +44,7 @@ Documentation
 
 ``public interface CourseraOAuth2Service``
 
-Interface ``CourseraOAuth2Service`` specifies the interface for an object that manage client config and returns Coursera authentication tokens.
+Interface ``CourseraOAuth2Service`` specifies the interface for an object that manages client config and returns Coursera authentication tokens.
 
 Implementations: ``public class CourseraOAuth2ServiceImpl``
 
@@ -68,7 +67,7 @@ Parameters:
     scope - by default used "view_profile", for business use "access_business_api".
 
 Throws:
-``CreateClientAppException`` - if any error occured while creating client config
+``CreateClientAppException`` - if any error occurred while creating client config
 
 ::
 
@@ -84,7 +83,7 @@ and auth token file from ``<home.dir>/.coursera/<client_name>_oauth2.csv``
 By default starting server callback listener and get auth tokens from Coursera OAuth API.
 
 Throws:
-``TokenNotGeneratedException`` - if any error occured while generating OAuth2 tokens
+``TokenNotGeneratedException`` - if any error occurred while generating OAuth2 tokens
 
 ::
 
@@ -114,7 +113,7 @@ List of client config from local file: ``<home.dir>/.coursera/coaclient.csv``.
 Start server on default port '9876' for callback listener.
 
 Throws:
-``TokenNotGeneratedException`` - if any error occured while starting server listener
+``TokenNotGeneratedException`` - if any error occurred while starting server listener
 
 ::
 
