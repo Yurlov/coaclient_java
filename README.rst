@@ -10,7 +10,7 @@ Install Maven from http://maven.apache.org/install.html
 
 Install JAVA from https://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html
 
-Clone project, open terminal, go to project directory, run in terminal ``'mvn package'``, you can find jar in ``$project_dir/target/`` folder.
+Clone project, open terminal, go to project directory, run in terminal ``'mvn package'``, you can find jar with dependencies in ``$project_dir/target/`` folder.
 
 Setup
 -----
@@ -23,7 +23,7 @@ application, set the Redirect URI to be http://localhost:9876/callback?client_id
 Usage
 -----
 
-Build jar file by command ``'mvn package'``, import jar to your project and create new object:
+Build jar file by command ``'mvn package'``, import jar with dependencies to your project and create new object:
 
 ::
 

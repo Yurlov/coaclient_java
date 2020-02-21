@@ -32,6 +32,11 @@ public class CourseraOAuth2FileUtils {
                                                String clientId,
                                                String secretKey,
                                                String scopes) throws CreateClientAppException {
+
+        if (getClientConfigByNameOrId(clientName) != null) {
+            throw new CreateClientAppException("A client with name: " + clientName + " already exists");
+        }
+
         File cacheDir = new File(TOKEN_CACHE_DIR);
         if (!cacheDir.exists()) {
             cacheDir.mkdir();
@@ -42,7 +47,6 @@ public class CourseraOAuth2FileUtils {
         if (!config.exists()) {
             isNewFile = true;
         }
-
         try (FileWriter csvWriter = new FileWriter(config, true)) {
             if (isNewFile) {
                 csvWriter.append(CourseraOAuth2Constants.CLIENT_APP_NAME);
