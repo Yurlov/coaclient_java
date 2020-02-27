@@ -1,7 +1,8 @@
 package com.coursera.oauth2_0.util;
 
 import com.coursera.oauth2_0.exception.CreateClientAppException;
-import com.coursera.oauth2_0.model.CourseraOAuth2Config;
+import com.coursera.oauth2_0.model.AuthTokens;
+import com.coursera.oauth2_0.model.ClientConfig;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -10,18 +11,17 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Base64Utils;
 
-public class CourseraOAuth2FileUtils {
+public class FileOAuth2Utils {
 
-    private static final Logger logger = LoggerFactory.getLogger(CourseraOAuth2FileUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(FileOAuth2Utils.class);
 
     private static final String TOKEN_CACHE_DIR = System.getProperty("user.home") + File.separator + ".coursera";
     private static final String CONFIG_FILE ="coaclient.csv";
@@ -31,7 +31,7 @@ public class CourseraOAuth2FileUtils {
     public static void writeClientConfigToFile(String clientName,
                                                String clientId,
                                                String secretKey,
-                                               String scopes) throws CreateClientAppException {
+                                               Set<String> scopes) throws CreateClientAppException {
 
         if (getClientConfigByNameOrId(clientName) != null) {
             throw new CreateClientAppException("A client with name: " + clientName + " already exists");
@@ -65,7 +65,7 @@ public class CourseraOAuth2FileUtils {
             csvWriter.append(SEPARATOR);
             csvWriter.append(secretKey);
             csvWriter.append(SEPARATOR);
-            csvWriter.append(scopes);
+            csvWriter.append(String.join("+", scopes));
             csvWriter.append("\n");
 
             csvWriter.flush();
@@ -75,9 +75,7 @@ public class CourseraOAuth2FileUtils {
     }
 
     public static void saveAuthTokens(String clientName,
-                                      String refreshToken,
-                                      String accessToken,
-                                      String expiredTime) {
+                                      AuthTokens authTokens) {
         File tokensFile = new File(TOKEN_CACHE_DIR + File.separator + clientName + TOKEN_FILE_SUFFIX);
         if (tokensFile.exists()) {
             tokensFile.delete();
@@ -90,11 +88,11 @@ public class CourseraOAuth2FileUtils {
             csvWriter.append(SEPARATOR);
             csvWriter.append(CourseraOAuth2Constants.EXPIRES_IN);
             csvWriter.append("\n");
-            csvWriter.append(Base64Utils.encodeToString(refreshToken.getBytes()));
+            csvWriter.append(Base64Utils.encodeToString(authTokens.getRefreshToken().getBytes()));
             csvWriter.append(SEPARATOR);
-            csvWriter.append(Base64Utils.encodeToString(accessToken.getBytes()));
+            csvWriter.append(Base64Utils.encodeToString(authTokens.getAccessToken().getBytes()));
             csvWriter.append(SEPARATOR);
-            csvWriter.append(expiredTime);
+            csvWriter.append(authTokens.getExpiredIn());
             csvWriter.append("\n");
 
             csvWriter.flush();
@@ -103,14 +101,13 @@ public class CourseraOAuth2FileUtils {
         }
     }
 
-    public static Map<String, String> getAuthTokensFromFile(String clientAppName) {
-        Map<String, String> authTokens = new HashMap<>();
+    public static AuthTokens getAuthTokensFromFile(String clientAppName) {
         File tokensFile = new File(TOKEN_CACHE_DIR + File.separator + clientAppName + TOKEN_FILE_SUFFIX);
         if (!tokensFile.exists()) {
             logger.error("File with {} tokens not found in path: {}. Please try to generate auth tokens.",
                     clientAppName,
                     tokensFile.toPath());
-            return authTokens;
+            return null;
         }
 
         try (BufferedReader csvReader = new BufferedReader(new FileReader(tokensFile.getPath()))) {
@@ -120,17 +117,16 @@ public class CourseraOAuth2FileUtils {
                 if (!splitRow[0].equals(CourseraOAuth2Constants.REFRESH_TOKEN_KEY)) {
                     byte[] decodedRefreshToken = Base64Utils.decode(splitRow[0].getBytes());
                     byte[] decodedAccessToken = Base64Utils.decode(splitRow[1].getBytes());
-
-                    authTokens.put(CourseraOAuth2Constants.REFRESH_TOKEN_KEY, new String(decodedRefreshToken));
-                    authTokens.put(CourseraOAuth2Constants.ACCESS_TOKEN_KEY, new String(decodedAccessToken));
-                    authTokens.put(CourseraOAuth2Constants.EXPIRES_IN, splitRow[2]);
-                    return authTokens;
+                    return new AuthTokens(
+                            new String(decodedRefreshToken),
+                            new String(decodedAccessToken),
+                            splitRow[2]);
                 }
             }
         } catch (IOException e) {
             logger.error("Error while read tokens file: {}", e.getMessage());
         }
-        return authTokens;
+        return null;
     }
 
     public static void deleteClientConfig(String clientName) {
@@ -155,7 +151,7 @@ public class CourseraOAuth2FileUtils {
         }
     }
 
-    public static CourseraOAuth2Config getClientConfigByNameOrId(String clientIdentifier) {
+    public static ClientConfig getClientConfigByNameOrId(String clientIdentifier) {
         try (BufferedReader csvReader = new BufferedReader(new FileReader(
                 TOKEN_CACHE_DIR + File.separator + CONFIG_FILE))) {
             String row;
@@ -163,7 +159,7 @@ public class CourseraOAuth2FileUtils {
                 String[] configRow = row.split(SEPARATOR);
                 if (!configRow[0].equals(CourseraOAuth2Constants.CLIENT_APP_NAME) &&
                         (configRow[0].equals(clientIdentifier) || configRow[1].equals(clientIdentifier))) {
-                    return createConfig(configRow);
+                    return createClientConfig(configRow);
                 }
             }
         } catch (IOException e) {
@@ -174,15 +170,15 @@ public class CourseraOAuth2FileUtils {
         return null;
     }
 
-    public static List<CourseraOAuth2Config> getClientsFromConfigFile() {
-        List<CourseraOAuth2Config> clientConfigs = new ArrayList<>();
+    public static List<ClientConfig> getClientConfigsFromConfigFile() {
+        List<ClientConfig> clientConfigs = new ArrayList<>();
         try (BufferedReader csvReader = new BufferedReader(new FileReader(
                 TOKEN_CACHE_DIR + File.separator + CONFIG_FILE))) {
             String row;
             while ((row = csvReader.readLine()) != null) {
                 String[] configRow = row.split(SEPARATOR);
                 if (!configRow[0].equals(CourseraOAuth2Constants.CLIENT_APP_NAME)) {
-                    clientConfigs.add(createConfig(configRow));
+                    clientConfigs.add(createClientConfig(configRow));
                 }
             }
         } catch (IOException e) {
@@ -194,8 +190,8 @@ public class CourseraOAuth2FileUtils {
         return clientConfigs;
     }
 
-    private static CourseraOAuth2Config createConfig(String[] configRow) {
-        return new CourseraOAuth2Config(
+    private static ClientConfig createClientConfig(String[] configRow) {
+        return new ClientConfig(
                 configRow[0],
                 configRow[1],
                 configRow[2],

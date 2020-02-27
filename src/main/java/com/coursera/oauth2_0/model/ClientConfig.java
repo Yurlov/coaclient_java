@@ -9,7 +9,7 @@ import lombok.ToString;
 @Setter
 @AllArgsConstructor
 @ToString
-public class CourseraOAuth2Config {
+public class ClientConfig {
     private String clientName;
     private String clientId;
     private String clientSecretKey;

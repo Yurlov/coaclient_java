@@ -2,9 +2,10 @@ package com.coursera.oauth2_0.service;
 
 import com.coursera.oauth2_0.exception.CreateClientAppException;
 import com.coursera.oauth2_0.exception.TokenNotGeneratedException;
-import com.coursera.oauth2_0.model.CourseraOAuth2Config;
+import com.coursera.oauth2_0.model.AuthTokens;
+import com.coursera.oauth2_0.model.ClientConfig;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 /**
  * Interface for managing Coursera OAuth2 API tokens
@@ -12,6 +13,7 @@ import java.util.Map;
  * @author Viktor Yurlov
  */
 public interface CourseraOAuth2Service {
+
     /**
      * Add new client config
      *
@@ -21,17 +23,17 @@ public interface CourseraOAuth2Service {
      * @param scope Scope of request
      * @throws CreateClientAppException if any error occured in process
      */
-    void addClient(String clientName,
-                   String clientId,
-                   String clientSecret,
-                   String scope) throws CreateClientAppException;
+    void addClientConfig(String clientName,
+                         String clientId,
+                         String clientSecret,
+                         Set<String> scope) throws CreateClientAppException;
 
     /**
      * Delete client config by client name
      *
      * @param clientName Client name
      */
-    void deleteClient(String clientName);
+    void deleteClientConfig(String clientName);
 
     /**
      * Generate authentication tokens
@@ -39,7 +41,7 @@ public interface CourseraOAuth2Service {
      * @param clientName Client name
      * @throws TokenNotGeneratedException if any error occured in process
      */
-    void generateOAuth2Tokens(String clientName) throws TokenNotGeneratedException;
+    void generateAuthTokens(String clientName) throws TokenNotGeneratedException;
 
     /**
      * Get client authentication tokens
@@ -47,7 +49,7 @@ public interface CourseraOAuth2Service {
      * @param clientName Client name
      * @return Map of authentication tokens
      */
-    Map<String, String> getAuthTokens(String clientName);
+    AuthTokens getAuthTokens(String clientName);
 
     /**
      * Get client access token
@@ -62,17 +64,12 @@ public interface CourseraOAuth2Service {
      *
      * @return Client config entities
      */
-    List<CourseraOAuth2Config> getClients();
-
-    /**
-     * Start server for listening callback
-     *
-     */
-    void startServerCallbackListener() throws TokenNotGeneratedException;
+    List<ClientConfig> getClientConfigs();
 
     /**
      * Stop server for listening callback
      *
      */
     void stopServerCallbackListener();
+
 }
