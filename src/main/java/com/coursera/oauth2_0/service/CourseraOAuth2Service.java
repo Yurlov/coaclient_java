@@ -47,7 +47,7 @@ public interface CourseraOAuth2Service {
      * Get client authentication tokens
      *
      * @param clientName Client name
-     * @return Map of authentication tokens
+     * @return AuthTokens 
      */
     AuthTokens getAuthTokens(String clientName);
 
